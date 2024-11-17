@@ -720,6 +720,8 @@ version = "0.1.0"
 dependencies = [
  "dioxus",
  "dioxus-logger",
+ "wasm-bindgen",
+ "web-sys",
 ]
 
 [[package]]
