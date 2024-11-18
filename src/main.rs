@@ -1,5 +1,7 @@
 #![allow(non_snake_case)]
 
+mod command_chain;
+
 mod app;
 mod banner;
 

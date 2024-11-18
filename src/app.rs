@@ -39,6 +39,7 @@ fn Home() -> Element {
     rsx! {
         div { class: "w-full h-full", tabindex: 0, onkeydown: on_key_down,
             div {
+                { Search() },
                 { banner::Banner() },
                 h1 { "High-Five counter: {count}" }
                 Link { to: Route::Blog { id: count() }, "Go to blog" }
@@ -60,6 +61,17 @@ fn Editor() -> Element {
     rsx! {
         div {
             button { { content() } }
+        }
+    }
+}
+
+#[component]
+fn Search() -> Element {
+    rsx! {
+        div { class: "z-10 fixed flex w-full h-full items-center justify-center pointer-events-none",
+            div { class: "bg-zinc-50 opacity-75 p-10 rounded-lg shadow-lg pointer-events-auto",
+                p { "test" }
+            }
         }
     }
 }
