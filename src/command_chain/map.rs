@@ -1,4 +1,4 @@
-use im::{OrdMap, Vector};
+use im::{OrdMap, OrdSet, Vector};
 
 #[derive(Clone)]
 pub enum Map<V: Clone> {
@@ -10,6 +10,12 @@ pub enum Map<V: Clone> {
 pub enum Node<V: Clone> {
     SubTree(OrdMap<char, Node<V>>),
     Value(V),
+}
+
+pub enum SearchResult<V: Clone> {
+    Value(V),
+    Children(OrdSet<char>),
+    None,
 }
 
 impl<V: Clone> Map<V> {
@@ -34,6 +40,14 @@ impl<V: Clone> Map<V> {
                 None => Map::Empty,
                 Some(node) => Map::NonEmpty(node),
             },
+        }
+    }
+
+    pub fn search(self: &Self, key: String) -> SearchResult<V> {
+        let chars = key_to_vec(key);
+        match self {
+            Map::Empty => SearchResult::None,
+            Map::NonEmpty(node) => node.rec_search(chars),
         }
     }
 }
@@ -84,6 +98,23 @@ impl<V: Clone> Node<V> {
                         }
                     }
                 },
+            },
+        }
+    }
+
+    fn rec_search(self: &Self, mut key: Vector<char>) -> SearchResult<V> {
+        match (key.pop_front(), self) {
+            (None, Node::Value(value)) => SearchResult::Value(value.clone()),
+            (None, Node::SubTree(ord_tree)) => {
+                SearchResult::Children(ord_tree.keys().fold(OrdSet::new(), |mut ord_set, key| {
+                    ord_set.insert(*key);
+                    ord_set
+                }))
+            }
+            (Some(_), Node::Value(_)) => SearchResult::None,
+            (Some(c), Node::SubTree(ord_tree)) => match ord_tree.get(&c) {
+                None => SearchResult::None,
+                Some(node) => node.rec_search(key),
             },
         }
     }
