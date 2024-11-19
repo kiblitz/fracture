@@ -1,5 +1,6 @@
 use crate::banner;
 use crate::command_chain;
+use crate::commander;
 
 use std::sync::Mutex;
 
@@ -31,29 +32,14 @@ fn Blog(id: i32) -> Element {
 #[component]
 fn Home() -> Element {
     let mut show_search = use_signal(|| false);
-    let leader_mapping = command_chain::map::Map::new()
-        .with(
-            "  ".to_owned(),
-            Mutex::new(move || show_search.set(!show_search())),
-        )
-        .unwrap();
-    let mut current_command_chain = use_signal(|| Vector::new());
+    let commander = commander::Commander::new(move || show_search.set(!show_search()));
+    let current_command_chain = use_signal(|| Vector::new());
     let mut count = use_signal(|| 0);
     let on_key_down = move |e: KeyboardEvent| match e.key() {
         Key::Character(s) => {
             if s.len() == 1 {
                 let c = s.chars().next().unwrap();
-                current_command_chain.write().push_back(c);
-                match leader_mapping.search(current_command_chain()) {
-                    command_chain::map::SearchResult::None => {
-                        current_command_chain.set(Vector::new())
-                    }
-                    command_chain::map::SearchResult::Value(f) => {
-                        f.lock().unwrap()();
-                        current_command_chain.set(Vector::new());
-                    }
-                    command_chain::map::SearchResult::Children(_) => (),
-                }
+                commander.on_key_press(current_command_chain, c);
                 /*
                 let _ = web_sys::window()
                     .unwrap()
