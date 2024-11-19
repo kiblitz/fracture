@@ -1,6 +1,10 @@
 use crate::banner;
+use crate::command_chain;
+
+use std::sync::Mutex;
 
 use dioxus::prelude::*;
+use im::Vector;
 
 #[derive(Clone, Routable, Debug, PartialEq)]
 enum Route {
@@ -26,11 +30,35 @@ fn Blog(id: i32) -> Element {
 
 #[component]
 fn Home() -> Element {
+    let mut show_search = use_signal(|| false);
+    let leader_mapping = command_chain::map::Map::new()
+        .with(
+            "  ".to_owned(),
+            Mutex::new(move || show_search.set(!show_search())),
+        )
+        .unwrap();
+    let mut current_command_chain = use_signal(|| Vector::new());
     let mut count = use_signal(|| 0);
     let on_key_down = move |e: KeyboardEvent| match e.key() {
         Key::Character(s) => {
             if s.len() == 1 {
-                let _ = web_sys::window().unwrap().alert_with_message(&s.to_owned());
+                let c = s.chars().next().unwrap();
+                current_command_chain.write().push_back(c);
+                match leader_mapping.search(current_command_chain()) {
+                    command_chain::map::SearchResult::None => {
+                        current_command_chain.set(Vector::new())
+                    }
+                    command_chain::map::SearchResult::Value(f) => {
+                        f.lock().unwrap()();
+                        current_command_chain.set(Vector::new());
+                    }
+                    command_chain::map::SearchResult::Children(_) => (),
+                }
+                /*
+                let _ = web_sys::window()
+                    .unwrap()
+                    .alert_with_message("");
+                */
             }
         }
         _ => (),
@@ -39,7 +67,7 @@ fn Home() -> Element {
     rsx! {
         div { class: "w-full h-full", tabindex: 0, onkeydown: on_key_down,
             div {
-                { Search() },
+                Search { show: show_search() }
                 { banner::Banner() },
                 h1 { "High-Five counter: {count}" }
                 Link { to: Route::Blog { id: count() }, "Go to blog" }
@@ -66,11 +94,13 @@ fn Editor() -> Element {
 }
 
 #[component]
-fn Search() -> Element {
+fn Search(show: bool) -> Element {
     rsx! {
-        div { class: "z-10 fixed flex w-full h-full items-center justify-center pointer-events-none",
-            div { class: "bg-zinc-50 opacity-75 p-10 rounded-lg shadow-lg pointer-events-auto",
-                p { "test" }
+        if show {
+            div { class: "z-10 fixed flex w-full h-full items-center justify-center pointer-events-none",
+                div { class: "bg-zinc-50 opacity-75 p-10 rounded-lg shadow-lg pointer-events-auto",
+                    p { "test" }
+                }
             }
         }
     }

@@ -60,11 +60,10 @@ impl<V> Map<V> {
         }
     }
 
-    pub fn search(self: &Self, key: String) -> SearchResult<V> {
-        let chars = key_to_vec(key);
+    pub fn search(self: &Self, key: Vector<char>) -> SearchResult<V> {
         match self {
             Map::Empty => SearchResult::None,
-            Map::NonEmpty(node) => node.rec_search(chars),
+            Map::NonEmpty(node) => node.rec_search(key),
         }
     }
 }

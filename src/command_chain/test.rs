@@ -3,6 +3,7 @@ mod tests {
     use crate::command_chain::map::*;
 
     use expect_test::{expect, Expect};
+    use im::Vector;
 
     fn to_string(map: &Map<i32>) -> String {
         fn rec(output: &mut Vec<String>, key: &mut String, map: &Node<i32>) {
@@ -138,6 +139,14 @@ mod tests {
         );
     }
 
+    fn key_to_vec(key: String) -> Vector<char> {
+        let mut chars = Vector::new();
+        key.chars().into_iter().for_each(|c| {
+            chars.push_back(c);
+        });
+        chars
+    }
+
     fn search_result_expect_test(
         search_result: Result<SearchResult<i32>, &'static str>,
         expect: Expect,
@@ -170,7 +179,7 @@ mod tests {
             let map = map.without("abc".to_owned());
             let map = map.without("abe".to_owned());
             let map = map.without("cast".to_owned());
-            Ok(map.search("case".to_owned()))
+            Ok(map.search(key_to_vec("case".to_owned())))
         })();
 
         search_result_expect_test(search_result, expect!["Value: 5"]);
@@ -185,7 +194,7 @@ mod tests {
             let map = map.with("cast".to_owned(), 4)?;
             let map = map.with("case".to_owned(), 5)?;
             let map = map.with("cass".to_owned(), 6)?;
-            Ok(map.search("ab".to_owned()))
+            Ok(map.search(key_to_vec("ab".to_owned())))
         })();
 
         search_result_expect_test(search_result, expect!["Children: cd"]);
@@ -200,7 +209,7 @@ mod tests {
             let map = map.with("abef".to_owned(), 2)?;
             let map = map.with("abecadaba".to_owned(), 2)?;
             let map = map.with("abridge".to_owned(), 2)?;
-            Ok(map.search("ab".to_owned()))
+            Ok(map.search(key_to_vec("ab".to_owned())))
         })();
 
         search_result_expect_test(search_result, expect!["Children: cder"]);
@@ -212,7 +221,7 @@ mod tests {
             let map = Map::new();
             let map = map.with("abc".to_owned(), 1)?;
             let map = map.with("abd".to_owned(), 2)?;
-            Ok(map.search("abce".to_owned()))
+            Ok(map.search(key_to_vec("abce".to_owned())))
         })();
 
         search_result_expect_test(search_result, expect!["None"]);
