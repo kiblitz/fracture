@@ -1,24 +1,41 @@
 use im::{OrdMap, OrdSet, Vector};
+use std::sync::Arc;
 
-#[derive(Clone)]
-pub enum Map<V: Clone> {
+pub enum Map<V> {
     Empty,
     NonEmpty(Node<V>),
 }
 
-#[derive(Clone)]
-pub enum Node<V: Clone> {
+pub enum Node<V> {
     SubTree(OrdMap<char, Node<V>>),
-    Value(V),
+    Value(Arc<V>),
 }
 
-pub enum SearchResult<V: Clone> {
-    Value(V),
+pub enum SearchResult<V> {
+    Value(Arc<V>),
     Children(OrdSet<char>),
     None,
 }
 
-impl<V: Clone> Map<V> {
+impl<V> Clone for Map<V> {
+    fn clone(&self) -> Self {
+        match self {
+            Map::Empty => Map::Empty,
+            Map::NonEmpty(node) => Map::NonEmpty(node.clone()),
+        }
+    }
+}
+
+impl<V> Clone for Node<V> {
+    fn clone(&self) -> Self {
+        match self {
+            Node::Value(value) => Node::Value(value.clone()),
+            Node::SubTree(ord_map) => Node::SubTree(ord_map.clone()),
+        }
+    }
+}
+
+impl<V> Map<V> {
     pub fn new() -> Self {
         Map::Empty
     }
@@ -52,10 +69,10 @@ impl<V: Clone> Map<V> {
     }
 }
 
-impl<V: Clone> Node<V> {
+impl<V> Node<V> {
     fn rec_set(self: &Self, mut key: Vector<char>, value: V) -> Result<Self, &'static str> {
         match (key.pop_front(), self) {
-            (None, Node::Value(_)) => Ok(Node::Value(value)),
+            (None, Node::Value(_)) => Ok(Node::Value(Arc::new(value))),
             (None, Node::SubTree(_)) => Err(
                 "Attempting to add a prefix of a command chain which already exists in the mapping",
             ),
@@ -74,7 +91,7 @@ impl<V: Clone> Node<V> {
 
     fn rec_add(mut key: Vector<char>, value: V) -> Result<Self, &'static str> {
         match key.pop_front() {
-            None => Ok(Node::Value(value)),
+            None => Ok(Node::Value(Arc::new(value))),
             Some(c) => {
                 let sub_node = Node::rec_add(key, value)?;
                 Ok(Node::SubTree(OrdMap::unit(c, sub_node)))
