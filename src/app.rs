@@ -54,7 +54,7 @@ fn Home() -> Element {
         div { class: "w-full h-full", tabindex: 0, onkeydown: on_key_down,
             div {
                 Search { show: show_search() }
-                { banner::Banner() },
+                { banner::Banner(banner::BannerProps { command_chain: current_command_chain() }) },
                 h1 { "High-Five counter: {count}" }
                 Link { to: Route::Blog { id: count() }, "Go to blog" }
                 button {
