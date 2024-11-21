@@ -1,5 +1,6 @@
 use crate::banner;
 use crate::commander;
+use crate::key;
 use crate::vim_mode;
 
 use dioxus::prelude::*;
@@ -27,25 +28,35 @@ fn Blog(id: i32) -> Element {
     }
 }
 
+/*
+let _ = web_sys::window()
+    .unwrap()
+    .alert_with_message("");
+*/
+
 #[component]
 fn Home() -> Element {
     let mut show_search = use_signal(|| false);
     let commander = commander::Commander::new(move || show_search.set(!show_search()));
     let current_command_chain = use_signal(|| Vector::new());
     let mode = use_signal(|| vim_mode::Mode::Normal);
-    let on_key_down = move |e: KeyboardEvent| match e.key() {
-        Key::Character(s) => {
-            if s.len() == 1 {
-                let c = s.chars().next().unwrap();
-                commander.on_key_press(mode, current_command_chain, c);
-                /*
-                let _ = web_sys::window()
-                    .unwrap()
-                    .alert_with_message("");
-                */
+    let on_key_down = move |e: KeyboardEvent| {
+        let key = match e.key() {
+            Key::Character(s) => {
+                if s.len() == 1 {
+                    Some(key::Key::Char(s.chars().next().unwrap()))
+                } else {
+                    None
+                }
             }
+            Key::Escape => Some(key::Key::Esc),
+            _ => None,
+        };
+
+        match key {
+            Some(key) => commander.on_key_press(mode, current_command_chain, key),
+            None => (),
         }
-        _ => (),
     };
 
     let mut count = use_signal(|| 0);
