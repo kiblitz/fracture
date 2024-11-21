@@ -5,6 +5,7 @@ mod command_chain;
 mod app;
 mod banner;
 mod commander;
+mod vim_mode;
 
 use dioxus::prelude::*;
 use dioxus_logger::tracing::{info, Level};

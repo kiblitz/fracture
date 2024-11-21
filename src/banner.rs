@@ -1,11 +1,13 @@
+use crate::vim_mode;
+
 use dioxus::prelude::*;
 use im::Vector;
 
 #[component]
-pub fn Banner(command_chain: Vector<char>) -> Element {
+pub fn Banner(mode: vim_mode::Mode, command_chain: Vector<char>) -> Element {
     rsx! {
         div { class: "relative w-full bg-gradient-to-tr from-blue-700 to-purple-400 text-white py-4 rounded-b-lg",
-            { VimInfo(VimInfoProps { command_chain }) },
+            { VimInfo(VimInfoProps { mode, command_chain }) },
             { ModuleNavigator() },
             { FractureStatus() }
         }
@@ -13,8 +15,8 @@ pub fn Banner(command_chain: Vector<char>) -> Element {
 }
 
 #[component]
-fn VimInfo(command_chain: Vector<char>) -> Element {
-    let status = format!("[normal] {}", command_chain_to_string(command_chain));
+fn VimInfo(mode: vim_mode::Mode, command_chain: Vector<char>) -> Element {
+    let status = format!("[{}] {}", mode, command_chain_to_string(command_chain));
     rsx! {
         div { class: "absolute left-0 top-0 h-full flex items-center px-2",
             p { "{status}" }

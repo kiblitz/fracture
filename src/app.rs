@@ -1,8 +1,6 @@
 use crate::banner;
-use crate::command_chain;
 use crate::commander;
-
-use std::sync::Mutex;
+use crate::vim_mode;
 
 use dioxus::prelude::*;
 use im::Vector;
@@ -34,12 +32,12 @@ fn Home() -> Element {
     let mut show_search = use_signal(|| false);
     let commander = commander::Commander::new(move || show_search.set(!show_search()));
     let current_command_chain = use_signal(|| Vector::new());
-    let mut count = use_signal(|| 0);
+    let mode = use_signal(|| vim_mode::Mode::Normal);
     let on_key_down = move |e: KeyboardEvent| match e.key() {
         Key::Character(s) => {
             if s.len() == 1 {
                 let c = s.chars().next().unwrap();
-                commander.on_key_press(current_command_chain, c);
+                commander.on_key_press(mode, current_command_chain, c);
                 /*
                 let _ = web_sys::window()
                     .unwrap()
@@ -50,11 +48,12 @@ fn Home() -> Element {
         _ => (),
     };
 
+    let mut count = use_signal(|| 0);
     rsx! {
         div { class: "w-full h-full", tabindex: 0, onkeydown: on_key_down,
             div {
                 Search { show: show_search() }
-                { banner::Banner(banner::BannerProps { command_chain: current_command_chain() }) },
+                { banner::Banner(banner::BannerProps { mode: mode(),  command_chain: current_command_chain() }) },
                 h1 { "High-Five counter: {count}" }
                 Link { to: Route::Blog { id: count() }, "Go to blog" }
                 button {
