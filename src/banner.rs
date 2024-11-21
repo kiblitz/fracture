@@ -1,4 +1,4 @@
-use crate::vim_mode;
+use crate::types::vim_mode;
 
 use dioxus::prelude::*;
 use im::Vector;

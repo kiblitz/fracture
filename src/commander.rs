@@ -1,6 +1,6 @@
 use crate::command_chain;
-use crate::key::Key;
-use crate::vim_mode;
+use crate::types::key::Key;
+use crate::types::vim_mode;
 
 use std::sync::Mutex;
 

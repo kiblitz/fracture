@@ -1,7 +1,7 @@
 use crate::banner;
 use crate::commander;
-use crate::key;
-use crate::vim_mode;
+use crate::types::key;
+use crate::types::vim_mode;
 
 use dioxus::prelude::*;
 use im::Vector;

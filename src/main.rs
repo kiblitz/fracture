@@ -1,12 +1,11 @@
 #![allow(non_snake_case)]
 
 mod command_chain;
+mod types;
 
 mod app;
 mod banner;
 mod commander;
-mod key;
-mod vim_mode;
 
 use dioxus::prelude::*;
 use dioxus_logger::tracing::{info, Level};
